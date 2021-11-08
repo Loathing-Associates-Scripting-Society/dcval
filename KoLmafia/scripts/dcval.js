@@ -1778,16 +1778,17 @@ function main(arg) {
   try {
     for (_iterator.s(); !(_step = _iterator.n()).done;) {
       var shiny = _step.value;
-      (0,external_kolmafia_namespaceObject.print)("Item: ".concat(shiny));
-      (0,external_kolmafia_namespaceObject.print)("Quantity: ".concat(flattDatabase.get(shiny)[0]));
+      // print(`Item: ${shiny}`);
+      // print(`Quantity: ${flattDatabase.get(shiny)[0]}`);
       var v = parseInt(flattDatabase.get(shiny)[1]);
 
       var _q = parseInt(flattDatabase.get(shiny)[0]);
 
-      var _value2 = v * _q;
+      var _value2 = v * _q; // print(`Total Value: ${formatNumber(value)}`);
 
-      (0,external_kolmafia_namespaceObject.print)("Total Value: ".concat(formatNumber(_value2)));
+
       totalValue += _value2;
+      (0,external_kolmafia_namespaceObject.print)("".concat(formatNumber(flattDatabase.get(shiny)[0]), " ").concat(shiny, " @ ").concat(formatNumber(v), " = ").concat(formatNumber(_value2)));
     }
   } catch (err) {
     _iterator.e(err);
@@ -1795,7 +1796,7 @@ function main(arg) {
     _iterator.f();
   }
 
-  (0,external_kolmafia_namespaceObject.print)("That is a total of ".concat(formatNumber(totalValue))); // const saved = JSON.stringify(flattDatabase);
+  (0,external_kolmafia_namespaceObject.print)("That is a total value of ".concat(formatNumber(totalValue), " meat in ").concat(getPlayerFromIdOrName(arg).name, "'s DC")); // const saved = JSON.stringify(flattDatabase);
   // bufferToFile(saved, "dbvalue.txt");
 }
 })();

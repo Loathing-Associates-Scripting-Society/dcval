@@ -45,15 +45,24 @@ export function main(arg: string): void {
   }
   let totalValue = 0;
   for (const shiny of flattDatabase.keys()) {
-    print(`Item: ${shiny}`);
-    print(`Quantity: ${flattDatabase.get(shiny)[0]}`);
+    // print(`Item: ${shiny}`);
+    // print(`Quantity: ${flattDatabase.get(shiny)[0]}`);
     const v = parseInt(flattDatabase.get(shiny)[1]);
     const q = parseInt(flattDatabase.get(shiny)[0]);
     const value = v * q;
-    print(`Total Value: ${formatNumber(value)}`);
+    // print(`Total Value: ${formatNumber(value)}`);
     totalValue += value;
+    print(
+      `${formatNumber(flattDatabase.get(shiny)[0])} ${shiny} @ ${formatNumber(v)} = ${formatNumber(
+        value
+      )}`
+    );
   }
-  print(`That is a total of ${formatNumber(totalValue)}`);
+  print(
+    `That is a total value of ${formatNumber(totalValue)} meat in ${
+      getPlayerFromIdOrName(arg).name
+    }'s DC`
+  );
   // const saved = JSON.stringify(flattDatabase);
   // bufferToFile(saved, "dbvalue.txt");
 }
