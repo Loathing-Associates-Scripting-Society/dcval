@@ -1717,7 +1717,15 @@ function findFairyMultiplier(familiar) {
 ;// CONCATENATED MODULE: ./src/dcVal.ts
 function dcVal_createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = dcVal_unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
 
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || dcVal_unsupportedIterableToArray(arr) || _nonIterableSpread(); }
+
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
 function dcVal_unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return dcVal_arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return dcVal_arrayLikeToArray(o, minLen); }
+
+function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter); }
+
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return dcVal_arrayLikeToArray(arr); }
 
 function dcVal_arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
@@ -1731,7 +1739,7 @@ function formatNumber(num) {
 function main(arg) {
   var player = getPlayerFromIdOrName(arg).id;
   var page = (0,external_kolmafia_namespaceObject.visitUrl)("displaycollection.php?who=".concat(player));
-  var flattDatabase = new Map();
+  var dcDatabase = new Map();
   var dcCheck = /(?:<td valign=center><b>(.*?)<\/td><\/tr>)/gm;
   var items;
 
@@ -1744,7 +1752,7 @@ function main(arg) {
       } else {
         // print(`${cleanItem}`);
         var value = (0,external_kolmafia_namespaceObject.mallPrice)(Item.get(cleanItem));
-        flattDatabase.set(cleanItem, [1, value]);
+        dcDatabase.set(cleanItem, [1, value, value]);
       }
     } else {
       // figure out how to deal with names with parentheses - this breaks currently
@@ -1761,7 +1769,9 @@ function main(arg) {
           // print(`${name} is worth ${value}`);
 
 
-          flattDatabase.set(Item.get(name), [parseInt(quantity), _value]);
+          var _totalValue = parseInt(quantity) * _value;
+
+          dcDatabase.set(Item.get(name), [parseInt(quantity), _value, _totalValue]);
         } else {
           // figure out how to deal with names with parentheses
           (0,external_kolmafia_namespaceObject.print)("stupid things ".concat(items[1]));
@@ -1770,25 +1780,26 @@ function main(arg) {
     }
   }
 
-  var totalValue = 0;
+  var totalValue = 0; // now we sort the map by value
 
-  var _iterator = dcVal_createForOfIteratorHelper(flattDatabase.keys()),
+  var sortedDatabase = new Map(_toConsumableArray(dcDatabase.entries()).sort((a, b) => a[1][2] - b[1][2]));
+
+  var _iterator = dcVal_createForOfIteratorHelper(sortedDatabase.keys()),
       _step;
 
   try {
     for (_iterator.s(); !(_step = _iterator.n()).done;) {
       var shiny = _step.value;
       // print(`Item: ${shiny}`);
-      // print(`Quantity: ${flattDatabase.get(shiny)[0]}`);
-      var v = parseInt(flattDatabase.get(shiny)[1]);
+      // print(`Quantity: ${dcDatabase.get(shiny)[0]}`);
+      var v = parseInt(sortedDatabase.get(shiny)[1]);
 
-      var _q = parseInt(flattDatabase.get(shiny)[0]);
+      var _q = parseInt(sortedDatabase.get(shiny)[0]);
 
-      var _value2 = v * _q; // print(`Total Value: ${formatNumber(value)}`);
-
+      var _value2 = sortedDatabase.get(shiny)[2]; // print(`Total Value: ${formatNumber(value)}`);
 
       totalValue += _value2;
-      (0,external_kolmafia_namespaceObject.print)("".concat(formatNumber(flattDatabase.get(shiny)[0]), " ").concat(shiny, " @ ").concat(formatNumber(v), " = ").concat(formatNumber(_value2)));
+      (0,external_kolmafia_namespaceObject.print)("".concat(formatNumber(_q), " ").concat(shiny, " @ ").concat(formatNumber(v), " = ").concat(formatNumber(_value2)));
     }
   } catch (err) {
     _iterator.e(err);
@@ -1796,7 +1807,7 @@ function main(arg) {
     _iterator.f();
   }
 
-  (0,external_kolmafia_namespaceObject.print)("That is a total value of ".concat(formatNumber(totalValue), " meat in ").concat(getPlayerFromIdOrName(arg).name, "'s DC")); // const saved = JSON.stringify(flattDatabase);
+  (0,external_kolmafia_namespaceObject.print)("That is a total value of ".concat(formatNumber(totalValue), " meat in ").concat(getPlayerFromIdOrName(arg).name, "'s DC")); // const saved = JSON.stringify(dcDatabase);
   // bufferToFile(saved, "dbvalue.txt");
 }
 })();

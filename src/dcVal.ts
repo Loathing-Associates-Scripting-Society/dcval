@@ -8,7 +8,7 @@ function formatNumber(num: number) {
 export function main(arg: string): void {
   const player = getPlayerFromIdOrName(arg).id;
   const page = visitUrl(`displaycollection.php?who=${player}`);
-  const flattDatabase = new Map();
+  const dcDatabase = new Map();
   const dcCheck = /(?:<td valign=center><b>(.*?)<\/td><\/tr>)/gm;
   let items;
   while ((items = dcCheck.exec(page)) !== null) {
@@ -19,7 +19,7 @@ export function main(arg: string): void {
       } else {
         // print(`${cleanItem}`);
         const value = mallPrice(Item.get(cleanItem));
-        flattDatabase.set(cleanItem, [1, value]);
+        dcDatabase.set(cleanItem, [1, value, value]);
       }
     } else {
       // figure out how to deal with names with parentheses - this breaks currently
@@ -35,7 +35,8 @@ export function main(arg: string): void {
           const value = mallPrice(Item.get(name));
           //  print(`${parseInt(quantity.replace(/,/g, ""))}`);
           // print(`${name} is worth ${value}`);
-          flattDatabase.set(Item.get(name), [parseInt(quantity), value]);
+          const totalValue = parseInt(quantity) * value;
+          dcDatabase.set(Item.get(name), [parseInt(quantity), value, totalValue]);
         } else {
           // figure out how to deal with names with parentheses
           print(`stupid things ${items[1]}`);
@@ -44,25 +45,25 @@ export function main(arg: string): void {
     }
   }
   let totalValue = 0;
-  for (const shiny of flattDatabase.keys()) {
+
+  // now we sort the map by value
+  const sortedDatabase = new Map([...dcDatabase.entries()].sort((a, b) => a[1][2] - b[1][2]));
+
+  for (const shiny of sortedDatabase.keys()) {
     // print(`Item: ${shiny}`);
-    // print(`Quantity: ${flattDatabase.get(shiny)[0]}`);
-    const v = parseInt(flattDatabase.get(shiny)[1]);
-    const q = parseInt(flattDatabase.get(shiny)[0]);
-    const value = v * q;
+    // print(`Quantity: ${dcDatabase.get(shiny)[0]}`);
+    const v = parseInt(sortedDatabase.get(shiny)[1]);
+    const q = parseInt(sortedDatabase.get(shiny)[0]);
+    const value = sortedDatabase.get(shiny)[2];
     // print(`Total Value: ${formatNumber(value)}`);
     totalValue += value;
-    print(
-      `${formatNumber(flattDatabase.get(shiny)[0])} ${shiny} @ ${formatNumber(v)} = ${formatNumber(
-        value
-      )}`
-    );
+    print(`${formatNumber(q)} ${shiny} @ ${formatNumber(v)} = ${formatNumber(value)}`);
   }
   print(
     `That is a total value of ${formatNumber(totalValue)} meat in ${
       getPlayerFromIdOrName(arg).name
     }'s DC`
   );
-  // const saved = JSON.stringify(flattDatabase);
+  // const saved = JSON.stringify(dcDatabase);
   // bufferToFile(saved, "dbvalue.txt");
 }
